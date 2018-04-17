@@ -1,9 +1,7 @@
 (ns simplexity.core-test
-  (:require [clojure.test :refer :all]
-            [clojure.spec.alpha :as s]
-            [clojure.test.check]
-            ;; [clojure.test.check.impl]
+  (:require [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as test]
+            [clojure.test :refer :all]
             [simplexity.core :refer :all]))
 
 (defn passing
@@ -49,4 +47,10 @@
   (let [triangle (simplex [0 1 2])]
     (is (= [0 1 2] (first (facets triangle))))
     (is (= 1 (count (facets triangle))))
+    ))
+
+(deftest has-the-expected-homology
+  (let [pentachoron (simplex #{0 1 2 3 4})
+        h (homology pentachoron)]
+    (= 1 (h 0))
     ))
