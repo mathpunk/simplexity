@@ -1,6 +1,8 @@
 (ns simplexity.core-test
   (:require [clojure.test :refer :all]
             [clojure.spec.alpha :as s]
+            [clojure.test.check]
+            ;; [clojure.test.check.impl]
             [clojure.spec.test.alpha :as test]
             [simplexity.core :refer :all]))
 
@@ -35,8 +37,16 @@
 (deftest has-simplicial-faces
   (let [tetrahedron (simplex [0 3 7 12])]
     (is (every? #(s/valid? :simplexity.core/simplex %) (faces tetrahedron)))
-    (is (some #{[0 7]} (faces tetrahedron)))
     (is (some #{[0 3 7 12]} (faces tetrahedron)))
+    (is (some #{[0 7]} (faces tetrahedron)))
     (is (some #{[12]} (faces tetrahedron)))
     (is (some #{[]} (faces tetrahedron)))
     (is (passing `simplexity.core/faces *short-num-tests*))))
+
+;; TODO: the k-skeleton
+
+(deftest has-one-facet
+  (let [triangle (simplex [0 1 2])]
+    (is (= [0 1 2] (first (facets triangle))))
+    (is (= 1 (count (facets triangle))))
+    ))

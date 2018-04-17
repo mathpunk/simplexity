@@ -1,6 +1,7 @@
 (ns simplexity.core
   (:require [clojure.spec.alpha :as s]
             [clojure.math.combinatorics :as combo]
+            ;; [clojure.test.check.impl]
             [clojure.set :as set]
             [clojure.spec.test.alpha :as test]))
 
@@ -10,7 +11,9 @@
 (defprotocol Simplex
   (dim [s] "The dimension of the simplex, defined as |s|-1")
   (size [s] "The count of the vertex set of the simplex")
-  (faces [s] "The subsets of the vertices in the simplex"))
+  (faces [s] "The subsets of the vertices in the simplex")
+  (facets [s] "The maximal faces of a simplicial complex. I.e. the faces that are not members of any faces themselves")
+  )
 
 (s/fdef dim
         :args (s/cat :integral-vertices ::vertices)
@@ -35,7 +38,8 @@
   Simplex
   (dim [s] (- (count s) 1))
   (size [s] (count s))
-  (faces [s] (combo/subsets s)))
+  (faces [s] (combo/subsets s))
+  (facets [s] (seq [s])))
 
 (s/def ::simplex #(satisfies? Simplex %))
 
