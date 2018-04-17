@@ -3,34 +3,39 @@
             [clojure.math.combinatorics :as combo]
             ;; [clojure.test.check.impl]
             [clojure.set :as set]
-            [clojure.spec.test.alpha :as test]))
+            [clojure.spec.test.alpha :as test]
+            [clojure.spec.gen.alpha :as gen]))
 
 (s/def ::vertex nat-int?)
 (s/def ::vertices (s/coll-of ::vertex :distinct true :min-count 1))
 
 (defprotocol Simplex
-  (dim [s] "The dimension of the simplex, defined as |s|-1")
   (size [s] "The count of the vertex set of the simplex")
+  (dim [s] "The dimension of the simplex, defined as size-1")
   (faces [s] "The subsets of the vertices in the simplex")
-  (facets [s] "The maximal faces of a simplicial complex. I.e. the faces that are not members of any faces themselves")
-  )
+  (facets [s] "The maximal faces of a simplicial complex. I.e. the faces that are not members of any faces themselves"))
 
-(s/fdef dim
-        :args (s/cat :integral-vertices ::vertices)
-        :ret nat-int?
-        :fn #(= (count (:integral-vertices (:args %)))
-                (+ (:ret %) 1)))
+(declare simplex)
+
+(s/def ::simplex (s/with-gen #(satisfies? Simplex %)
+                   #(gen/fmap simplex (s/gen ::vertices))))
 
 (s/fdef size
-        :args (s/cat :integral-vertices ::vertices)
+        :args (s/cat :simplex ::simplex)
         :ret nat-int?
-        :fn #(= (count (:integral-vertices (:args %)))
+        :fn #(= (count (-> % :args :simplex))
                 (:ret %)))
 
+(s/fdef dim
+        :args (s/cat :simplex ::simplex)
+        :ret nat-int?
+        :fn #(= (size (-> % :args :simplex))
+                (+ (:ret %) 1)))
+
 (s/fdef faces
-        :args (s/cat :integral-vertices ::vertices)
+        :args (s/cat :simplex ::simplex)
         :ret seq?
-        :fn (s/and #(= (int (Math/pow 2 (count (-> % :args :integral-vertices))))
+        :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
                        (count (:ret %)))
                    #(every? (fn [face] (s/valid? ::simplex %)) (:ret %))))
 
@@ -40,8 +45,6 @@
   (size [s] (count s))
   (faces [s] (combo/subsets s))
   (facets [s] (seq [s])))
-
-(s/def ::simplex #(satisfies? Simplex %))
 
 (defn simplex [v]
   v)
