@@ -10,34 +10,6 @@
 (s/def ::simplex (s/with-gen #(satisfies? Complex %)
                    #(gen/fmap simplex (s/gen :simplexity.abstractions/vertices))))
 
-(s/fdef size
-        :args (s/cat :simplex ::simplex)
-        :ret nat-int?
-        :fn #(= (count (-> % :args :simplex))
-                (:ret %)))
-
-(s/fdef dim
-        :args (s/cat :complex ::complex)
-        :ret (s/or :nonempty nat-int?
-                   :empty #(= -1 %))
-        :fn #(s/and (nat-int? (-> % :ret last))
-                    (= (size (-> % :args :complex))
-                       (+ (-> % :ret last) 1))))
-
-(s/fdef faces
-        :args (s/cat :complex ::complex)
-        :ret seq?
-        :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :complex))))
-                       (count (:ret %)))
-                   #(every? (fn [face] (s/valid? ::complex %)) (:ret %))))
-
-;; TODO: Facets
-
-(s/fdef homology
-        :args (s/cat :complex ::complex)
-        :ret (s/fspec :args (s/cat :dimension :nat-int?)
-                      :ret nat-int?))
-
 (defn simplex [vertices]
   (reify Complex
     (size [s] (count vertices))
@@ -47,4 +19,38 @@
     (facets [s] [vertices])
     (homology [s] (fn [n] (if (zero? n) 1 0)))))
 
-#_(test/check `size)
+(s/fdef size
+        :args (s/cat :simplex ::simplex)
+        :ret nat-int?
+        :fn #(= (count (-> % :args :simplex))
+                (:ret %)))
+
+(s/fdef dim
+        :args (s/cat :simplex ::simplex)
+        :ret (s/or :nonempty nat-int?
+                   :empty #(= -1 %))
+        :fn #(s/and (nat-int? (-> % :ret last))
+                    (= (size (-> % :args :simplex))
+                       (+ (-> % :ret last) 1))))
+
+(s/fdef faces
+        :args (s/cat :simplex ::simplex)
+        :ret seq?
+        :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
+                       (count (:ret %)))
+                   #(every? (fn [face] (s/valid? ::simplex %)) (:ret %))))
+
+;; TODO: Facets
+
+(s/fdef homology
+        :args (s/cat :simplex ::simplex)
+        :ret (s/fspec :args (s/cat :dimension :nat-int?)
+                      :ret nat-int?))
+
+(test/check `dim)
+
+(test/check `size)
+
+(test/check `faces)
+
+(test/check `homology)

@@ -28,6 +28,15 @@
   (is (= 2 (dim (simplex [0 1 2]))))
   #_(is (passing `simplexity.simplex/dim)))
 
+(test/check `simplexity.abstractions/dim)
+
+(test/check `simplexity.abstractions/size)
+
+(test/check `simplexity.simplex/dim)
+
+(test/check `simplexity.simplex/size)
+
+
 (deftest has-size
   (is (- 1 (size (simplex #{0}))))
   (is (- 3 (size (simplex [1 3 6]))))
