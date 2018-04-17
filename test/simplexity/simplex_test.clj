@@ -1,8 +1,8 @@
-(ns simplexity.core-test
+(ns simplexity.simplex-test
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as test]
             [clojure.test :refer :all]
-            [simplexity.core :refer :all]))
+            [simplexity.simplex :refer :all]))
 
 (defn passing
   ([sym] (:check-passed (->> sym test/check test/summarize-results)))

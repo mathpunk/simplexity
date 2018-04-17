@@ -1,4 +1,4 @@
-(ns simplexity.core
+(ns simplexity.simplex
   (:require [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]))
