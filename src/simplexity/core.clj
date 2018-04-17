@@ -29,18 +29,20 @@
 (s/def ::complex (s/with-gen #(satisfies? Complex %)
                    #(gen/fmap complex (s/gen ::facets))))
 
-(s/fdef size
-        :args (s/cat :complex ::complex)
-        :ret nat-int?
-        :fn #(= (count (-> % :args :complex))
-                (:ret %)))
+#_(s/fdef size
+          :args (s/cat :complex ::complex)
+          :ret nat-int?
+          :fn #(= (count (-> % :args :complex))
+                  (:ret %)))
 
-(s/fdef dim
-        :args (s/cat :complex ::complex)
-        :ret (s/or :nonempty nat-int?
-                   :empty #(= -1 %))
-        :fn #(= (size (-> % :args :complex))
-                (+ (:ret %) 1)))
+#_(s/fdef dim
+          :args (s/cat :complex ::complex)
+          :ret (s/or :nonempty nat-int?
+                     :empty #(= -1 %))
+          :fn #(s/and (nat-int? (-> % :ret last))
+                      (= (size (-> % :args :complex))
+                         (+ (-> % :ret last) 1))))
+
 
 (s/fdef faces
         :args (s/cat :complex ::complex)
@@ -67,9 +69,12 @@
 (defn complex [vertices]
   vertices)
 
+(test/check `size)
+
+
 (comment "This check is failing every time:"
 
-         (test/check `dim)
+         (test/check `dim) 
 
          "with a java.lang.ClassCastException. (This is less weird than the MapEntry cannot be cast to Number exception I had before I improved the dim spec.)"
 
