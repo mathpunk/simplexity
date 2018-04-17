@@ -26,7 +26,7 @@
 (s/def ::simplex (s/with-gen #(satisfies? Complex %)
                    #(gen/fmap complex (s/gen ::vertices))))
 
-(s/def ::complex (s/with-gen ::facets
+(s/def ::complex (s/with-gen #(satisfies? Complex %)
                    #(gen/fmap complex (s/gen ::facets))))
 
 (s/fdef size
