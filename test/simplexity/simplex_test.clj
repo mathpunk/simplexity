@@ -17,22 +17,19 @@
   (is true))
 
 (deftest constructed-from-integers
-  (is (complex [0 1 2 3]))
-  (is (complex #{0 1 2}))
-  (is (complex '(1 4 5 6))))
+  (is (simplex [0 1 2 3]))
+  (is (simplex #{0 1 2}))
+  (is (simplex '(1 4 5 6))))
 
 (deftest has-dimension
-  (is (= 0 (dim (complex [0]))))
-  (is (= 1 (dim (complex [0 1]))))
-  (is (= 2 (dim (complex [0 1 2]))))
+  (is (= 0 (dim (simplex [0]))))
+  (is (= 1 (dim (simplex [0 1]))))
+  (is (= 2 (dim (simplex [0 1 2]))))
   (is (passing `simplexity.core/dim)))
 
-(test/check `simplexity.core/dim)
-
-
 (deftest has-size
-  (is (- 1 (size (complex #{0}))))
-  (is (- 3 (size (complex [1 3 6]))))
+  (is (- 1 (size (simplex #{0}))))
+  (is (- 3 (size (simplex [1 3 6]))))
   (is (passing `simplexity.core/size)))
 
 (deftest has-simplicial-faces
