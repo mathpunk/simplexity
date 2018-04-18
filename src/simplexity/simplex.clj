@@ -2,28 +2,27 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.math.combinatorics :as combo]
-            [simplexity.abstractions :refer :all]
+            ;; [simplexity.abstractions :refer :all]
             [clojure.spec.test.alpha :as test]))
 
 (declare simplex)
 
-(s/def ::simplex (s/with-gen #(satisfies? Complex %)
-                   #(gen/fmap simplex (s/gen :simplexity.abstractions/vertices))))
+(s/def ::simplex (s/coll-of integer? :distinct true))
+
+(s/fdef simplex
+        :args (s/cat :integral-simplex ::simplex))
 
 (defn simplex [vertices]
-  (reify Complex
-    (size [s] (count vertices))
-    (dim [s] (- (size s) 1))
-    ;; TODO: Bring back 'elements' and define 'faces' as the dim-1 elements
-    (faces [s] (combo/subsets vertices))
-    (facets [s] [vertices])
-    (homology [s] (fn [n] (if (zero? n) 1 0)))))
+  vertices)
 
 (s/fdef size
         :args (s/cat :simplex ::simplex)
         :ret nat-int?
         :fn #(= (count (-> % :args :simplex))
                 (:ret %)))
+
+(defn size [s]
+  (count s))
 
 (s/fdef dim
         :args (s/cat :simplex ::simplex)
@@ -33,24 +32,32 @@
                     (= (size (-> % :args :simplex))
                        (+ (-> % :ret last) 1))))
 
-(s/fdef faces
+(defn dim [s]
+  (- (size s) 1))
+
+(s/fdef elements
         :args (s/cat :simplex ::simplex)
         :ret seq?
         :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
                        (count (:ret %)))
-                   #(every? (fn [face] (s/valid? ::simplex %)) (:ret %))))
+                   #(every? (fn [element] (s/or :empty empty?
+                                                :nonempty-simplex (s/valid? ::simplex element))) (:ret %))))
 
-;; TODO: Facets
+(defn elements [s]
+  (combo/subsets s))
+
+(s/fdef facets
+        :args (s/cat :simplex ::simplex)
+        :ret (s/coll-of ::simplex)
+        :fn #(= (-> % :args :simplex) (first (:ret %))))
+
+(defn facets [s]
+  #{s})
 
 (s/fdef homology
         :args (s/cat :simplex ::simplex)
-        :ret (s/fspec :args (s/cat :dimension :nat-int?)
+        :ret (s/fspec :args (s/cat :dimension nat-int?)
                       :ret nat-int?))
 
-(test/check `dim)
-
-(test/check `size)
-
-(test/check `faces)
-
-(test/check `homology)
+(defn homology [s]
+  (fn [n] (if (zero? n) 1 0)))

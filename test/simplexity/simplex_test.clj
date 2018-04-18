@@ -1,6 +1,6 @@
 (ns simplexity.simplex-test
   (:require [clojure.spec.alpha :as s]
-            [simplexity.abstractions :refer :all]
+            ;; [simplexity.abstractions :refer :all]
             [clojure.spec.test.alpha :as test]
             [clojure.test :refer :all]
             [simplexity.simplex :refer :all]))
@@ -26,21 +26,12 @@
   (is (= 0 (dim (simplex [0]))))
   (is (= 1 (dim (simplex [0 1]))))
   (is (= 2 (dim (simplex [0 1 2]))))
-  #_(is (passing `simplexity.simplex/dim)))
-
-(test/check `simplexity.abstractions/dim)
-
-(test/check `simplexity.abstractions/size)
-
-(test/check `simplexity.simplex/dim)
-
-(test/check `simplexity.simplex/size)
-
+  (is (passing `simplexity.simplex/dim)))
 
 (deftest has-size
   (is (- 1 (size (simplex #{0}))))
   (is (- 3 (size (simplex [1 3 6]))))
-  #_(is (passing `simplexity.simplex/size)))
+  (is (passing `simplexity.simplex/size)))
 
 (deftest has-simplicial-faces
   (let [tetrahedron (simplex [0 3 7 12])]
@@ -48,8 +39,8 @@
     (is (some #{[0 7]} (faces tetrahedron)))
     (is (some #{[12]} (faces tetrahedron)))
     (is (some #{[]} (faces tetrahedron)))
-    #_(is (every? #(s/valid? :simplexity.simplex/simplex %) (faces tetrahedron)))
-    #_(is (passing `simplexity.simplex/faces *short-num-tests*))))
+    (is (every? #(s/valid? :simplexity.simplex/simplex %) (faces tetrahedron)))
+    (is (passing `simplexity.simplex/elements *short-num-tests*))))
 
 ;; TODO: the k-skeleton
 
@@ -57,9 +48,10 @@
   (let [triangle (simplex [0 1 2])]
     (is (= [0 1 2] (first (facets triangle))))
     (is (= 1 (count (facets triangle))))
-    ))
+    (is (passing `simplexity.simplex/facets))))
 
-(deftest has-the-expected-homology
+(deftest has-the-ball-homology
   (let [pentachoron (simplex #{0 1 2 3 4})
         h (homology pentachoron)]
-    (is (= 1 (h 0)))))
+    (is (= 1 (h 0)))
+    (is (passing `simplexity.simplex/homology))))
