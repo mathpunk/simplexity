@@ -1,11 +1,6 @@
 (ns simplexity.simplex
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.math.combinatorics :as combo]
-            ;; [simplexity.abstractions :refer :all]
-            [clojure.spec.test.alpha :as test]))
-
-(declare simplex)
+  (:require [clojure.math.combinatorics :as combo]
+            [clojure.spec.alpha :as s]))
 
 (s/def ::simplex (s/coll-of integer? :distinct true))
 
@@ -35,16 +30,39 @@
 (defn dim [s]
   (- (size s) 1))
 
+(defn empty-or-simplex? [element]
+  (s/or :empty empty?
+        :nonempty-simplex (s/valid? ::simplex element)))
+
 (s/fdef elements
         :args (s/cat :simplex ::simplex)
         :ret seq?
         :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
                        (count (:ret %)))
-                   #(every? (fn [element] (s/or :empty empty?
-                                                :nonempty-simplex (s/valid? ::simplex element))) (:ret %))))
+                   #(every? empty-or-simplex? (:ret %))))
 
 (defn elements [s]
   (combo/subsets s))
+
+(s/fdef faces
+        :args (s/cat :simplex ::simplex)
+        :ret seq?
+        :fn (s/and #(s/or :dim-1-or-greater (= (size (-> % :args :simplex))
+                                               (count (:ret %)))
+                          :dim-0 (= 0 (count (:ret %))))
+                   #(every? empty-or-simplex? (:ret %))
+                   #(every? (fn [f] (= (- (dim (-> % :args :simplex)) 1)
+                                       (dim f))) (:ret %))))
+
+(defn v-hat
+  "Returns a vector with the i-th element dropped."
+  [v i]
+  (vec (concat (subvec v 0 i) (subvec v (+ 1 i) (count v)))))
+
+(defn faces [s]
+  (if (= 1 (size s))
+    '()
+    (map vec (map (partial v-hat s) (range (count s))))))
 
 (s/fdef facets
         :args (s/cat :simplex ::simplex)
