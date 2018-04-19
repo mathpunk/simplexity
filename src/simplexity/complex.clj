@@ -1,11 +1,10 @@
 (ns simplexity.complex
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [clojure.math.combinatorics :as combo]))
+            [clojure.math.combinatorics :as combo]
+            [clojure.spec.test.alpha :as test]))
 
 (require '[cognitect.transcriptor :refer [check!]])
-
-(def c [[0 1] [1 2] [2 0]])
 
 ;; (s/fdef dim
 ;;         :args :complex ::complex
@@ -15,52 +14,48 @@
 (defn dim [c]
   (- (reduce max 0 (map count c)) 1))
 
-(dim c)
-
-(check! #{1})
-
-
-(def tetra [[0 1 2 3]])
-
-(dim tetra)
-
-(check! #{3})
-
 (defn size [c] (-> c flatten set count))
 
-(size c)
-(check! #{3})
-
 (defn facets [kom] (seq kom))
-
-(def open-triangle [[0 1] [1 2] [2 0]])
-
-(some #{[0 1]} (facets open-triangle))
-(check! #{[0 1]})
-
-(not (some #{[0 1 2]} (facets open-triangle)))
-(check! #{true})
 
 (s/def ::simplex (s/coll-of integer?))
 (s/def ::strict-complex (s/coll-of ::simplex))
 (s/def ::complex (s/or :simplex ::simplex
                        :complex ::strict-complex))
 
-(defmulti faces #(first (s/conform ::complex %)))
 
-open-triangle
-(check! ::strict-complex)
+;;;;; in dev: elements ;;;;;;
 
-[0 1 2]
-(check! ::simplex)
+(defmulti elements #(first (s/conform ::complex %)))
 
-(defmethod faces :simplex
+(defmethod elements :simplex
   [s]
   (combo/subsets s))
 
-(defmethod faces :complex
+(defmethod elements :complex
   [c]
-  (set (mapcat faces (facets c))))
+  (set (mapcat elements (facets c))))
+
+(elements open-triangle)
+(check! (s/every ::simplex))
+
+(def triangle [0 1 2])
+
+(elements triangle)
+(some #{[0 1 2]} (elements triangle))
+(check! #{[0 1 2]})
+(count (elements triangle))
+(check! #{8})
+
+(s/fdef elements
+        :args (s/alt :simplex (s/cat :simplex ::simplex)
+                     :complex (s/cat :complex ::strict-complex))
+        :ret (s/every ::simplex))
+
+(test/check `elements)
+
+
+
 
 (def triangle [0 1 2])
 

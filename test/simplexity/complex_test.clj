@@ -1,16 +1,21 @@
 (ns simplexity.complex-test
   (:require [clojure.spec.alpha :as s]
+            [cognitect.transcriptor :as xr]
             [simplexity.complex :refer :all]
             [clojure.spec.test.alpha :as test]
             [clojure.test :refer :all]))
 
-(def triangle (complex [[0 1 2]]))
-(def hollow-triangle (complex [[0 1] [1 2] [2 0]]))
 
-(deftest constructed-from-integers
-  (is (complex [[0 1 2] [3 4] [4 0]]))
-  (is (complex [[0 1 2]]))
-  #_(is (complex #{#{0 1 2} #{3 4} #{0 3}})))
+(deftest repl-example-interaction
+  (is (nil? (xr/run "./test/simplexity/complex.repl"))))
+
+;; (def triangle (complex [0 1 2]))
+;; (def open-triangle (complex [[0 1] [1 2] [2 0]]))
+
+;; (deftest constructed-from-integers
+;;   (is (complex [[0 1 2] [3 4] [4 0]]))
+;;   (is (complex [[0 1 2]]))
+;;   #_(is (complex #{#{0 1 2} #{3 4} #{0 3}})))
 
 
 ;; (deftest has-dimension

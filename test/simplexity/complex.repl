@@ -1,0 +1,42 @@
+(ns simplexity.complex)
+
+(require '[cognitect.transcriptor :as xr :refer (check!)]
+         '[clojure.spec.alpha :as s]
+         '[clojure.spec.gen.alpha :as gen]
+         '[clojure.math.combinatorics :as combo]
+         '[clojure.spec.test.alpha :as test])
+
+
+(def open-triangle [[0 1] [1 2] [2 0]])
+
+(dim open-triangle)
+
+(check! #{1})
+
+(def tetra [[0 1 2 3]])
+
+(dim tetra)
+
+(check! #{3})
+
+(size open-triangle)
+
+(check! #{3})
+
+(some #{[0 1]} (facets open-triangle))
+(check! #{[0 1]})
+
+(not (some #{[0 1 2]} (facets open-triangle)))
+(check! #{true})
+
+open-triangle
+
+(check! :simplexity.complex/strict-complex)
+
+[0 1 2]
+
+(check! :simplexity.complex/simplex)
+
+
+
+
