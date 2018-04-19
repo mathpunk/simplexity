@@ -29,14 +29,35 @@
 (not (some #{[0 1 2]} (facets open-triangle)))
 (check! #{true})
 
-open-triangle
 
+;; For a strict complex:
+open-triangle
 (check! :simplexity.complex/strict-complex)
 
-[0 1 2]
+(elements open-triangle)
+(check! (s/every :simplexity.complex/simplex))
 
+(elements open-triangle)
+(some #{[0 1]} open-triangle)
+(check! #{[0 1]})
+
+(elements open-triangle)
+(some #{[0]} (elements open-triangle))
+(check! #{[0]})
+
+(count (elements open-triangle))
+(check! #{7})
+
+;; For a simplex:
+
+(def triangle [0 1 2])
+triangle
 (check! :simplexity.complex/simplex)
 
+(elements triangle)
+(some #{[0 1 2]} (elements triangle))
+(check! #{[0 1 2]})
+(count (elements triangle))
+(check! #{8})
 
-
-
+(test/check `simplexity.complex/elements {:clojure.spec.test.check/opts {:num-tests 5}})
