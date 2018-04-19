@@ -7,9 +7,6 @@
 
 (def c [[0 1] [1 2] [2 0]])
 
-(def tetra [[1 2 3 4]])
-
-;; (s/def ::complex (s/coll-of ))
 ;; (s/fdef dim
 ;;         :args :complex ::complex
 ;;         :ret nat-int?)
@@ -22,6 +19,9 @@
 
 (check! #{1})
 
+
+(def tetra [[0 1 2 3]])
+
 (dim tetra)
 
 (check! #{3})
@@ -31,22 +31,15 @@
 (size c)
 (check! #{3})
 
-
 (defn facets [kom] (seq kom))
 
-(def open-triangle c)
-(some #{[0 1]} open-triangle)
+(def open-triangle [[0 1] [1 2] [2 0]])
 
 (some #{[0 1]} (facets open-triangle))
-(check! #{true})
+(check! #{[0 1]})
+
 (not (some #{[0 1 2]} (facets open-triangle)))
 (check! #{true})
-
-(defn true! []
-  (check! #{true}))
-(defn false! []
-  (check! #{false}))
-
 
 (s/def ::simplex (s/coll-of integer?))
 (s/def ::strict-complex (s/coll-of ::simplex))
@@ -55,8 +48,11 @@
 
 (defmulti faces #(first (s/conform ::complex %)))
 
-(s/conform ::complex open-triangle)
-(s/conform ::complex [0 1 2])
+open-triangle
+(check! ::strict-complex)
+
+[0 1 2]
+(check! ::simplex)
 
 (defmethod faces :simplex
   [s]
@@ -66,20 +62,23 @@
   [c]
   (set (mapcat faces (facets c))))
 
-(facets open-triangle)
+(def triangle [0 1 2])
 
-(faces [0 1])
+;; how how should we test faces?
 
-(faces open-triangle)
 
-(some #{[0 1]} (faces open-triangle))
-(check! ::simplex)
+;;;;;;;;;;;;;;;;;;
 
-(defn count-subsets [c]
-  (int (Math/pow 2 (count c))))
+;; (faces open-triangle)
 
-(count-subsets open-triangle)
-(count (faces open-triangle))
+;; (some #{[0 1]} (faces open-triangle))
+;; (check! ::simplex)
+
+;; (defn count-subsets [c]
+;;   (int (Math/pow 2 (count c))))
+
+;; (count-subsets open-triangle)
+;; (count (faces open-triangle))
 
 
 ;; Shit. I meant to be naming this elements. Well let's checkpoint here.
