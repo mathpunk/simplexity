@@ -14,7 +14,7 @@
 (task-options!
  pom {:project     project
       :version     version
-      :description "For topological data analysis"
+      :description "Functions for topological data analysis"
       :url         "http://github.com/mathpunk/simplexity"
       :scm         {:url "https://github.com/mathpunk/simplexity"}
       :license     {"None I guess?"
