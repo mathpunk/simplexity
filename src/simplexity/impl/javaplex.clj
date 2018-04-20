@@ -2,19 +2,15 @@
   (:require [clojure.math.combinatorics :as combo]
             [simplexity.simplex]
             [simplexity.complex]
+            [cognitect.transcriptor :refer [check!]]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as test])
   (:import [edu.stanford.math.plex4.streams.impl ExplicitSimplexStream]
            [edu.stanford.math.plex4.api Plex4]))
 
-(require '[cognitect.transcriptor :as xr :refer (check!)])
-
 (defn e [] (ExplicitSimplexStream.))
 
 (defn size [s] (.getSize s))
-
-(size (e))
-(check! #{0})
 
 (defn add-vertex
   ([simplex vertex & vs]
@@ -29,20 +25,8 @@
 (s/def ::plex #(= edu.stanford.math.plex4.streams.impl.ExplicitSimplexStream
                   (type %)))
 
-(size (add-vertex (e) 0))
-(check! #{1})
-
-(size (add-vertex (e) 0 1 2 3))
-(check! #{4})
-
-(size (-> (e)
-          (add-vertex 0)
-          (add-vertex 1)
-          (add-element [0 1])))
-(check! #{3})
-
 (s/fdef clutter
-        :args (s/cat :simplex :simplexity.simplex/simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret ::plex
         :fn #(= (count (-> % :args :simplex))
                 (.getSize (:ret %))))
@@ -52,15 +36,10 @@
     (doall (map #(.addVertex simplex %) vertices))
     simplex))
 
-(test/check `clutter)
-
 (defn- build-simplex [vertices]
   (doto (clutter vertices)  ;; The vertices
     (add-element vertices)  ;; The facet
     (.ensureAllFaces)))     ;; The elements of the facet. Javaplex uses the other definition of faces
-
-(size (build-simplex [0 1 2]))
-(check! #{7})
 
 (defn- build-strict-complex [facets]
   (let [vertices (set (flatten facets))
@@ -68,15 +47,6 @@
     (doall (map #(add-element simplex %) facets))
     (.ensureAllFaces simplex)
     simplex))
-
-(size (build-strict-complex [[0 1] [1 2] [2 0]]))
-(check! #{6})
-
-(size (build-strict-complex [[0 1 2]]))
-(check! #{7})
-
-(s/conform :simplexity.complex/complex [0 1 2])
-(s/conform :simplexity.complex/complex [[0 1 2]])
 
 (defmulti build-complex #(first (s/conform :simplexity.complex/complex %)))
 
@@ -87,12 +57,3 @@
 (defmethod build-complex :complex
   [facets]
   (build-strict-complex facets))
-
-(size (build-complex [[0 1] [1 2] [2 0]]))
-(check! #{6})
-
-(size (build-complex [0 1 2]))
-(check! #{7})
-
-(size (build-complex [[0 1 2]]))
-(check! #{7})
