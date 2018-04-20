@@ -1,0 +1,39 @@
+(ns simplexity.repl)
+
+(require '[cognitect.transcriptor :as xr :refer (check!)]
+         '[simplexity.simplex]
+         '[simplexity.complex]
+         '[simplexity.impl.javaplex :refer :all]
+         '[clojure.spec.alpha :as s]
+         '[clojure.spec.test.alpha :as test])
+
+;; Empty simplex
+;; -----------------
+(size (e))
+(check! #{0})
+
+;; Adding vertices and elements
+;; ---------------------------------
+
+(size (add-vertex (e) 0))
+(check! #{1})
+
+(size (add-vertex (e) 0 1 2 3))
+(check! #{4})
+
+(size (-> (e)
+          (add-vertex 0)
+          (add-vertex 1)
+          (add-element [0 1])))
+(check! #{3})
+
+;; Builders
+;; -----------------
+(size (build-complex [[0 1] [1 2] [2 0]]))
+(check! #{6})
+
+(size (build-complex [0 1 2]))
+(check! #{7})
+
+(size (build-complex [[0 1 2]]))
+(check! #{7})

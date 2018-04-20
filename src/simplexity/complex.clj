@@ -2,8 +2,10 @@
   (:require [clojure.math.combinatorics :as combo]
             [clojure.spec.alpha :as s]))
 
-(s/def ::simplex (s/coll-of integer?))
+(s/def ::simplex (s/coll-of integer? :distinct true))
+
 (s/def ::strict-complex (s/coll-of ::simplex))
+
 (s/def ::complex (s/or :simplex ::simplex
                        :complex ::strict-complex))
 
@@ -31,7 +33,6 @@
   [c]
   (set (mapcat elements (facets c))))
 
-;; faces: Defined for a simplex, not for a complex
+;; NOTE: Faces are defined for a simplex, not for a complex. Use (faces (facets c)).
 
 (declare homology star closure link)
-

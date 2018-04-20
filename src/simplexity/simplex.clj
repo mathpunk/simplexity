@@ -1,17 +1,20 @@
 (ns simplexity.simplex
   (:require [clojure.math.combinatorics :as combo]
-            [clojure.spec.alpha :as s]))
+            [simplexity.complex]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as test]))
 
-(s/def ::simplex (s/coll-of integer? :distinct true))
+(defn plex-type [p]
+  (first (s/conform :simplexity.complex/complex p)))
 
 (s/fdef simplex
-        :args (s/cat :integral-simplex ::simplex))
+        :args (s/cat :integral-simplex :simplexity.complex/simplex))
 
 (defn simplex [vertices]
   vertices)
 
 (s/fdef size
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret nat-int?
         :fn #(= (count (-> % :args :simplex))
                 (:ret %)))
@@ -20,39 +23,64 @@
   (count s))
 
 (s/fdef dim
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret (s/or :nonempty nat-int?
-                   :empty #(= -1 %))
-        :fn #(s/and (nat-int? (-> % :ret last))
-                    (= (size (-> % :args :simplex))
-                       (+ (-> % :ret last) 1))))
+                   :empty #(= -1 %)))
 
-(defn dim [s]
+(defmulti dim plex-type)
+
+(defmethod dim :simplex
+  [s]
   (- (size s) 1))
+
+(defmethod dim :complex
+  [c]
+  (- (reduce max 0 (map count c)) 1))
+
+(s/fdef facets
+        :args (s/cat :complex :simplexity.complex/complex)
+        :ret (s/every :simplexity.complex/simplex))
+
+(defmulti facets plex-type)
+
+(defmethod facets :simplex
+  [s]
+  (seq #{s}))
+
+(defmethod facets :complex
+  [c] (seq c))
 
 (defn empty-or-simplex? [element]
   (s/or :empty empty?
         :nonempty-simplex (s/valid? ::simplex element)))
 
 (s/fdef elements
-        :args (s/cat :simplex ::simplex)
-        :ret seq?
-        :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
-                       (count (:ret %)))
+        :args (s/cat :complex :simplexity.complex/complex)
+        :ret (s/every :simplexity.complex/simplex)
+        :fn (s/and #(>= (int (Math/pow 2 (size (-> % :args :complex))))
+                        (count (:ret %)))
                    #(every? empty-or-simplex? (:ret %))))
 
-(defn elements [s]
+(defmulti elements plex-type)
+
+(defmethod elements :simplex
+  [s]
   (combo/subsets s))
 
+(defmethod elements :complex
+  [c]
+  (set (mapcat elements (facets c))))
+
+#_(test/check `elements {:clojure.spec.test.check/opts {:num-tests 5}})
+
 (s/fdef faces
-        :args (s/cat :simplex ::simplex)
-        :ret seq?
-        :fn (s/and #(s/or :dim-1-or-greater (= (size (-> % :args :simplex))
-                                               (count (:ret %)))
-                          :dim-0 (= 0 (count (:ret %))))
-                   #(every? empty-or-simplex? (:ret %))
-                   #(every? (fn [f] (= (- (dim (-> % :args :simplex)) 1)
-                                       (dim f))) (:ret %))))
+        :args (s/cat :simplex :simplexity.complex/simplex)
+        :ret (s/or :point empty?
+                   :dim-1-or-greater (s/every :simplexity.complex/simplex))
+        ;; TODO: All faces are of one fewer dimension than the :args
+        #_:fn #_(s/or :point empty?
+                      :dim-1-or-greater #(let [d (dim (-> % :args :simplex))]
+                                           (every? (fn [face] (= d (dim face))) (-> % :ret)))))
 
 (defn v-hat
   "Returns a vector with the i-th element dropped."
@@ -64,16 +92,8 @@
     '()
     (map vec (map (partial v-hat s) (range (count s))))))
 
-(s/fdef facets
-        :args (s/cat :simplex ::simplex)
-        :ret (s/coll-of ::simplex)
-        :fn #(= (-> % :args :simplex) (first (:ret %))))
-
-(defn facets [s]
-  #{s})
-
 (s/fdef homology
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret (s/fspec :args (s/cat :dimension nat-int?)
                       :ret nat-int?))
 
