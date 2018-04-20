@@ -1,0 +1,1 @@
+/home/man/prototypes/checkers/src/checkers/core.clj
