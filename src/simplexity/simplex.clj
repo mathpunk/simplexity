@@ -1,17 +1,16 @@
 (ns simplexity.simplex
   (:require [clojure.math.combinatorics :as combo]
-            [clojure.spec.alpha :as s]))
-
-(s/def ::simplex (s/coll-of integer? :distinct true))
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as test]))
 
 (s/fdef simplex
-        :args (s/cat :integral-simplex ::simplex))
+        :args (s/cat :integral-simplex :simplexity.complex/simplex))
 
 (defn simplex [vertices]
   vertices)
 
 (s/fdef size
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret nat-int?
         :fn #(= (count (-> % :args :simplex))
                 (:ret %)))
@@ -20,7 +19,7 @@
   (count s))
 
 (s/fdef dim
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret (s/or :nonempty nat-int?
                    :empty #(= -1 %))
         :fn #(s/and (nat-int? (-> % :ret last))
@@ -35,7 +34,7 @@
         :nonempty-simplex (s/valid? ::simplex element)))
 
 (s/fdef elements
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret seq?
         :fn (s/and #(= (int (Math/pow 2 (size (-> % :args :simplex))))
                        (count (:ret %)))
@@ -44,8 +43,11 @@
 (defn elements [s]
   (combo/subsets s))
 
+(test/check `elements)
+
+
 (s/fdef faces
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret seq?
         :fn (s/and #(s/or :dim-1-or-greater (= (size (-> % :args :simplex))
                                                (count (:ret %)))
@@ -65,15 +67,15 @@
     (map vec (map (partial v-hat s) (range (count s))))))
 
 (s/fdef facets
-        :args (s/cat :simplex ::simplex)
-        :ret (s/coll-of ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
+        :ret (s/coll-of :simplexity.complex/simplex)
         :fn #(= (-> % :args :simplex) (first (:ret %))))
 
 (defn facets [s]
   #{s})
 
 (s/fdef homology
-        :args (s/cat :simplex ::simplex)
+        :args (s/cat :simplex :simplexity.complex/simplex)
         :ret (s/fspec :args (s/cat :dimension nat-int?)
                       :ret nat-int?))
 

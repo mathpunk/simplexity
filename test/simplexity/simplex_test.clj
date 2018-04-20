@@ -7,9 +7,6 @@
 
 (def ^:dynamic *short-num-tests* 3)
 
-(deftest is-testing
-  (is true))
-
 (deftest constructed-from-integers
   (is (simplex [0 1 2 3]))
   (is (simplex #{0 1 2}))
