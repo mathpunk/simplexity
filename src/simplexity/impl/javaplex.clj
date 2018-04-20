@@ -1,6 +1,7 @@
 (ns simplexity.impl.javaplex
   (:require [clojure.math.combinatorics :as combo]
             [simplexity.simplex]
+            [simplexity.complex]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as test])
   (:import [edu.stanford.math.plex4.streams.impl ExplicitSimplexStream]
@@ -74,24 +75,34 @@
 (.getSize (build-simplex [0 1 2]))
 (check! #{7})
 
-(defn build-complex [facets]
+(defn build-strict-complex [facets]
   (let [vertices (set (flatten facets))
         simplex (clutter vertices)]
     (doall (map #(add-element simplex %) facets))
     (.ensureAllFaces simplex)
     simplex))
 
-(.getSize (build-complex [[0 1] [1 2] [2 0]]))
+(.getSize (build-strict-complex [[0 1] [1 2] [2 0]]))
 (check! #{6})
 
-(.getSize (build-complex [[0 1 2]]))
+(.getSize (build-strict-complex [[0 1 2]]))
 (check! #{7})
 
+(s/conform :simplexity.complex/complex [0 1 2])
+(s/conform :simplexity.complex/complex [[0 1 2]])
 
+(defmulti build-complex #(first (s/conform :simplexity.complex/complex %)))
 
+(defmethod build-complex :simplex
+  [vertices]
+  (build-simplex vertices))
 
-
-
+(defmethod build-complex :complex
+  [facets]
+  (build-strict-complex facets))
 
 (.getSize (build-complex [0 1 2]))
+(check! #{7})
+
+(.getSize (build-complex [[0 1 2]]))
 (check! #{7})
