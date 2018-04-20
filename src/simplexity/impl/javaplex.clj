@@ -7,48 +7,39 @@
   (:import [edu.stanford.math.plex4.streams.impl ExplicitSimplexStream]
            [edu.stanford.math.plex4.api Plex4]))
 
-;; The New API
-;; --------------------
-;; Goal: Support passing homology tests in complex_test.clj
+(require '[cognitect.transcriptor :as xr :refer (check!)])
 
-
-;; Let's start by learning to construct javaplex simplexes.
 (defn e [] (ExplicitSimplexStream.))
 
-(.getSize (e))
+(defn size [s] (.getSize s))
+
+(size (e))
 (check! #{0})
 
-(.getSize (doto (e)
-            (.addVertex 0)))
-(check! #{1})
-
-(.getSize (doto (e)
-            (.addVertex 0)
-            (.addVertex 1)))
-(check! #{2})
-
-(.getSize
- (doto (e)
-   (.addVertex 0)
-   (.addVertex 1)
-   (.addElement (int-array [0,1]))))
-(check! #{3}) ;; surprise!
-
-(defn add-vertex [simplex vertex]
-  (.addVertex simplex vertex))
+(defn add-vertex
+  ([simplex vertex & vs]
+   (let [vertices (cons vertex vs)]
+     (doall (map #(.addVertex simplex %) vertices))
+     simplex)))
 
 (defn add-element [simplex element]
-  (.addElement simplex (int-array element)))
-
-(.getSize
- (doto (e)
-   (add-vertex 0)
-   (add-vertex 1)
-   (add-element [0 1])))
-(check! #{3})
+  (.addElement simplex (int-array element))
+  simplex)
 
 (s/def ::plex #(= edu.stanford.math.plex4.streams.impl.ExplicitSimplexStream
                   (type %)))
+
+(size (add-vertex (e) 0))
+(check! #{1})
+
+(size (add-vertex (e) 0 1 2 3))
+(check! #{4})
+
+(size (-> (e)
+          (add-vertex 0)
+          (add-vertex 1)
+          (add-element [0 1])))
+(check! #{3})
 
 (s/fdef clutter
         :args (s/cat :simplex :simplexity.simplex/simplex)
@@ -61,31 +52,27 @@
     (doall (map #(.addVertex simplex %) vertices))
     simplex))
 
-(require '[clojure.pprint :refer (pprint)])
-
-(map pprint (s/exercise :simplexity.simplex/simplex))
-
 (test/check `clutter)
 
-(defn build-simplex [vertices]
+(defn- build-simplex [vertices]
   (doto (clutter vertices)  ;; The vertices
     (add-element vertices)  ;; The facet
     (.ensureAllFaces)))     ;; The elements of the facet. Javaplex uses the other definition of faces
 
-(.getSize (build-simplex [0 1 2]))
+(size (build-simplex [0 1 2]))
 (check! #{7})
 
-(defn build-strict-complex [facets]
+(defn- build-strict-complex [facets]
   (let [vertices (set (flatten facets))
         simplex (clutter vertices)]
     (doall (map #(add-element simplex %) facets))
     (.ensureAllFaces simplex)
     simplex))
 
-(.getSize (build-strict-complex [[0 1] [1 2] [2 0]]))
+(size (build-strict-complex [[0 1] [1 2] [2 0]]))
 (check! #{6})
 
-(.getSize (build-strict-complex [[0 1 2]]))
+(size (build-strict-complex [[0 1 2]]))
 (check! #{7})
 
 (s/conform :simplexity.complex/complex [0 1 2])
@@ -101,8 +88,11 @@
   [facets]
   (build-strict-complex facets))
 
-(.getSize (build-complex [0 1 2]))
+(size (build-complex [[0 1] [1 2] [2 0]]))
+(check! #{6})
+
+(size (build-complex [0 1 2]))
 (check! #{7})
 
-(.getSize (build-complex [[0 1 2]]))
+(size (build-complex [[0 1 2]]))
 (check! #{7})
