@@ -1,0 +1,65 @@
+(ns unify.repl
+  (:require [cognitect.transcriptor :as xr :refer [check!]]
+            [clojure.spec.alpha :as s]))
+
+(require '[simplexity.simplex :refer :all])
+
+(dim [0 1 2])
+;; fails on what i think a simplex is
+
+(dim [[0 1 2]])
+(check! :simplexity.complex/dimension)
+
+(dim [[]])
+(check! :simplexity.complex/dimension)
+
+(dim [])
+(check! :simplexity.complex/dimension)
+
+(dim [0 1 2])
+;; I think there needs to be a multi again.
+
+
+
+;; Don't repeat your work --- maybe you did it in simplex, oops
+
+(ns resolve.simplex
+  (:require [cognitect.transcriptor :refer [check!]]))
+
+(require '[simplexity.simplex :refer :all])
+
+(dim [0 1 2])
+(check! :simplexity.complex/dimension)
+
+(dim [[0 1 2]])
+(check! :simplexity.complex/dimension)
+
+(dim [[2 3] [0 1 2]])
+(check! :simplexity.complex/dimension)
+
+(ns simplexity.repl)
+
+(require '[simplexity.simplex :as sim])
+(require '[simplexity.complex :as com])
+
+(sim/dim [0 1 2 4])
+#_(com/dim [0 1 2 4])
+
+#_(sim/dim [[0 1] [1 2] [2 3 4 5]])
+(com/dim [[0 1] [1 2] [2 3 4 5]])
+
+;; polysemy warning: 'size' is overloaded. do we care?
+(sim/elements [1 2 3 4]) ;; includes empty. s'okay? empty is a little interesting.
+(com/elements [1 2 3 4])
+
+#_(sim/elements [[1 2 3 4]]) 
+(com/elements [[1 2 3 4]])
+
+(sim/faces [0 1 2 3])
+#_(com/faces [0 1 2 3]) ;; no such thing defined
+
+(sim/facets [0 1 2 3])
+(com/facets [0 1 2 3])
+
+#_(sim/facets [[0 1 2 3]])
+(com/facets [[0 1 2 3]])

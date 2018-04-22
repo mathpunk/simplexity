@@ -1,3 +1,8 @@
+(ns simplexity.complex
+  (:require [clojure.spec.test.alpha :as test]
+            [cognitect.transcriptor :as xr]
+            [clojure.spec.alpha :as s]))
+
 (require '[simplexity.complex :refer :all]
          '[cognitect.transcriptor :as xr :refer (check!)]
          '[clojure.spec.alpha :as s]
@@ -6,9 +11,11 @@
          '[clojure.spec.test.alpha :as test])
 
 (def open-triangle [[0 1] [1 2] [2 0]])
+(check! :simplexity.complex/complex open-triangle)
+(check! false? (s/valid? :simplexity.complex/simplex open-triangle))
 
-open-triangle
-(check! :simplexity.complex/complex)
+;; Dimension
+;; ---------------------------
 
 (dim open-triangle)
 (check! #{1})
@@ -17,45 +24,53 @@ open-triangle
 (dim tetra)
 (check! #{3})
 
-(size open-triangle)
-(check! #{3})
+(test/check `simplexity.complex/dim)
 
-(facets open-triangle)
-(some #{[0 1]} (facets open-triangle))
-(check! #{[0 1]})
+;; Is this verification redundant or informative?
 
-(not (some #{[0 1 2]} (facets open-triangle)))
-(check! #{true})
+(def tri [0 1 2])
+(def tri-2 [[0 1 2]])
+(def ring [[0 1] [1 2] [2 0]])
+(def tetra [1 2 3 4])
+
+(check! #{2} (dim tri))
+(check! #{2} (dim tri-2))
+(check! #{1} (dim ring))
+(check! #{3} (dim tetra))
+(check! #{3} (dim [[0 1 2 3] [0 1] [2 3]]))
+
+;; Facets
+;; ----------------------
+(check! #{[0 1]} (some #{[0 1]} (facets open-triangle)))
+(check! #{true} (not (some #{[0 1 2]} (facets open-triangle))))
+
+(def triangle-1 [[0 1 2]])
+(def triangle-2 [0 1 2])
+(check! #{[0 1 2]} (some #{[0 1 2]} (facets triangle-1)))
+(check! #{[0 1 2]} (some #{[0 1 2]} (facets triangle-2)))
+(check! #{1} (count (facets triangle-1))) ;; A simplex is its only facet
+(check! #{1} (count (facets triangle-1)))
 
 
-;; For a strict complex:
-open-triangle
-(check! :simplexity.complex/strict-complex)
-
+;; Elements
+;; -------------------
 (elements open-triangle)
-(check! (s/every :simplexity.complex/simplex))
+(check! #{[0 1]} (some #{[0 1]} open-triangle))
+(check! #{[0]} (some #{[0]} (elements open-triangle)))
+(check! #{7} (count (elements open-triangle)))
+(check! true? (every? #(s/valid? :simplexity.complex/simplex %) (elements open-triangle)))
 
-(elements open-triangle)
-(some #{[0 1]} open-triangle)
-(check! #{[0 1]})
+;; I thought this:
+#_(check! true? (s/every :simplexity.complex/simplex (elements open-triangle)))
+;; ...would substitute for the predecessor. Not so much.
 
-(elements open-triangle)
-(some #{[0]} (elements open-triangle))
-(check! #{[0]})
+;; Faces
+;; -------------------
+;; Q: What are the 'faces' of a complex that is not a simplex? What should be returned? The facets? The faces of the facets? Nil?
 
-(count (elements open-triangle))
-(check! #{7})
 
-;; For a simplex:
-
-(def triangle [0 1 2])
-triangle
-(check! :simplexity.complex/simplex)
-
-(elements triangle)
-(some #{[0 1 2]} (elements triangle))
-(check! #{[0 1 2]})
-(count (elements triangle))
-(check! #{8})
-
-(test/check `simplexity.complex/elements {:clojure.spec.test.check/opts {:num-tests 5}})
+;; Helpful predicate
+;; ---------------------------
+(check! true? (simplex? [1 2 3]))
+(check! true? (simplex? [[1 2 3]]))
+(check! false? (simplex? [[0 1 2] [2 3]]))

@@ -1,0 +1,40 @@
+(ns simplexity.invariants
+  (:require [clojure.spec.alpha :as s]
+            [cognitect.transcriptor :as xr :refer [check!]]
+            [clojure.spec.gen.alpha :as gen]))
+
+(require '[simplexity.complex :refer :all])
+
+(check! :simplexity.complex/complex [[1 2 3]])
+(check! :simplexity.complex/complex [1 2 3])
+(check! :simplexity.complex/simplex [[1 2 3]])
+(check! :simplexity.complex/simplex [1 2 3])
+(check! :simplexity.complex/complex [[1 3 4] [0 1 2]])
+(check! false? (s/valid? :simplexity.complex/simplex [[1 3 4] [0 1 2]]))
+
+;; Great. We're missing containment/maximality checks, but at least the shapes are okay.
+
+(check! #{3} (count (faces [[1 2] [2 3] [3 1]])))
+(check! #{3} (count (faces [[1 2 3]])))
+(check! #{3} (count (faces [1 2 3])))
+(check! #{2} (count (faces [[1 2 3] [3 0]])))
+
+;; FACT:
+;; If a complex is a simplex,
+;; then its faces
+;; all have one dimension fewer than the simplex,
+;; and they are subsets of it.
+
+(defn simplex-sample [] (gen/sample (s/gen :simplexity.complex/simplex)))
+
+(defn correct-dimensionality? [s]
+  (every? #(= (- (dim s) 1) (dim %)) (faces s)))
+
+(check! true? (every? correct-dimensionality? (simplex-sample)))
+
+
+;; TODO:
+;; If a complex is a simplex,
+;; then its betti 0 is 1,
+;; and its betty everything else is 0.
+

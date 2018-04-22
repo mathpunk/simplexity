@@ -12,6 +12,7 @@
 (size (e))
 (check! #{0})
 
+
 ;; Adding vertices and elements
 ;; ---------------------------------
 
@@ -26,14 +27,3 @@
           (add-vertex 1)
           (add-element [0 1])))
 (check! #{3})
-
-;; Builders
-;; -----------------
-(size (build-complex [[0 1] [1 2] [2 0]]))
-(check! #{6})
-
-(size (build-complex [0 1 2]))
-(check! #{7})
-
-(size (build-complex [[0 1 2]]))
-(check! #{7})

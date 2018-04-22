@@ -8,6 +8,7 @@
                             [org.clojure/math.combinatorics "0.1.4"]
                             [adzerk/boot-test "RELEASE" :scope "test"]
                             [orchestra "2017.11.12-1"]
+                            [org.clojure/core.match "0.3.0-alpha5"]
                             [org.clojure/test.check "0.9.1-SNAPSHOT" :scope "test"]
                             [com.cognitect/transcriptor "0.1.5" :scope "test"]])
 
