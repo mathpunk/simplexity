@@ -1,0 +1,43 @@
+(ns simplexity.homology_repl
+  (:require [clojure.spec.test.alpha :as test]
+            [cognitect.transcriptor :as xr :refer [check!]]
+            [clojure.spec.test.alpha :as test]
+            [clojure.spec.gen.alpha :as gen]
+            [clojure.spec.alpha :as s]))
+
+(require '[simplexity.impl.javaplex :as jp]
+         '[simplexity.complex :refer :all])
+
+(defn sphere [k]
+  (-> (+ 2 k)
+      range
+      vec
+      faces
+      #_vec))
+
+(defn test-sphere-dimensionality [k]
+  (= (dim (sphere k)) k))
+
+(every? test-sphere-dimensionality (range 50))
+(check! true?)
+
+;; Homology of spheres
+;; https://topospaces.subwiki.org/wiki/Homology_of_spheres
+
+;; For n = 0, b0 = 2, all other bk are 0
+
+(check! #{2} (jp/betti 0 (sphere 0)))
+(every? #(= 0 %) (map #(jp/betti % (sphere 0)) (range 1 20)))
+(check! #{true})
+
+;; For n > 0, b0 = bn = 1, all other bk are 0
+(for [k (range 1 10)]
+  (and (check! #{1} (jp/betti 0 (sphere k)))
+       (check! #{1} (jp/betti k (sphere k)))
+       (check! true? (every? #(= 0 %)
+                             (map #(jp/betti % (sphere k)) (range 1 k))) )))
+
+
+;; Connectedness
+(check! true? (jp/connected? [[0 1 3] [3 4 5]]))
+(check! false? (jp/connected? [[0 1 2] [3 4 5]]))
