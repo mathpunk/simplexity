@@ -1,7 +1,6 @@
 (ns simplexity.repl)
 
 (require '[cognitect.transcriptor :as xr :refer (check!)]
-         '[simplexity.simplex]
          '[simplexity.complex]
          '[simplexity.impl.javaplex :refer :all]
          '[clojure.spec.alpha :as s]
@@ -11,7 +10,6 @@
 ;; -----------------
 (size (e))
 (check! #{0})
-
 
 ;; Adding vertices and elements
 ;; ---------------------------------

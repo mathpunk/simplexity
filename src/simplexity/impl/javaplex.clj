@@ -1,6 +1,5 @@
 (ns simplexity.impl.javaplex
   (:require [clojure.math.combinatorics :as combo]
-            [simplexity.simplex]
             [simplexity.complex]
             [cognitect.transcriptor :refer [check!]]
             [clojure.spec.alpha :as s]
@@ -50,10 +49,10 @@
 
 (defmulti build-complex #(first (s/conform :simplexity.complex/complex %)))
 
-(defmethod build-complex :simplex
+(defmethod build-complex :vertex-set
   [vertices]
   (build-simplex vertices))
 
-(defmethod build-complex :complex
+(defmethod build-complex :facet-set
   [facets]
   (build-strict-complex facets))

@@ -1,12 +1,10 @@
-(ns simplexity.complex
+(ns simplexity.complex_repl
   (:require [clojure.spec.test.alpha :as test]
-            [cognitect.transcriptor :as xr]
+            [cognitect.transcriptor :as xr :refer [check!]]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.spec.alpha :as s]))
 
 (require '[simplexity.complex :refer :all]
-         '[cognitect.transcriptor :as xr :refer (check!)]
-         '[clojure.spec.alpha :as s]
-         '[clojure.spec.gen.alpha :as gen]
          '[clojure.math.combinatorics :as combo]
          '[clojure.spec.test.alpha :as test])
 
@@ -59,18 +57,3 @@
 (check! #{[0]} (some #{[0]} (elements open-triangle)))
 (check! #{7} (count (elements open-triangle)))
 (check! true? (every? #(s/valid? :simplexity.complex/simplex %) (elements open-triangle)))
-
-;; I thought this:
-#_(check! true? (s/every :simplexity.complex/simplex (elements open-triangle)))
-;; ...would substitute for the predecessor. Not so much.
-
-;; Faces
-;; -------------------
-;; Q: What are the 'faces' of a complex that is not a simplex? What should be returned? The facets? The faces of the facets? Nil?
-
-
-;; Helpful predicate
-;; ---------------------------
-(check! true? (simplex? [1 2 3]))
-(check! true? (simplex? [[1 2 3]]))
-(check! false? (simplex? [[0 1 2] [2 3]]))
